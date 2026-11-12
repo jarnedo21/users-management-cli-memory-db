@@ -7,6 +7,7 @@ import com.jcaa.udec.collections.domain.core.exception.ClienteNoExisteException;
 import com.jcaa.udec.collections.domain.core.exception.ClienteYaExisteException;
 import com.jcaa.udec.collections.domain.core.model.Cliente;
 import com.jcaa.udec.collections.domain.core.valueobject.TipoActividad;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,6 +70,32 @@ class ClientesAdapterTest {
         assertThatThrownBy(() -> obtenerClientesAdapter.buscarPorCodigo("NO-EXISTE"))
                 .isInstanceOf(ClienteNoExisteException.class)
                 .hasMessage("El cliente no existe.");
+    }
+
+    @Test
+    void deberiaObtenerTodosLosClientesGuardados() {
+        // Arrange
+        Cliente primerCliente = crearCliente();
+        Cliente segundoCliente = crearCliente();
+        guardarClienteAdapter.guardar(primerCliente);
+        guardarClienteAdapter.guardar(segundoCliente);
+
+        // Act
+        List<Cliente> clientes = obtenerClientesAdapter.obtenerTodos();
+
+        // Assert
+        assertThat(clientes).containsExactly(primerCliente, segundoCliente);
+    }
+
+    @Test
+    void deberiaRetornarUnaListaInmutable() {
+        // Arrange
+        List<Cliente> clientes = obtenerClientesAdapter.obtenerTodos();
+
+        // Act
+        // Assert
+        assertThatThrownBy(() -> clientes.add(crearCliente()))
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 
     private static Cliente crearCliente() {
