@@ -7,6 +7,7 @@ import com.jcaa.udec.collections.domain.core.valueobject.Email;
 import com.jcaa.udec.collections.domain.core.valueobject.NombreUsuario;
 import com.jcaa.udec.collections.domain.core.valueobject.Password;
 import com.jcaa.udec.collections.domain.core.valueobject.UsuarioId;
+import com.jcaa.udec.collections.entrypoint.controller.ClienteControlador;
 import com.jcaa.udec.collections.entrypoint.controller.UsuarioControlador;
 import com.jcaa.udec.collections.entrypoint.controller.dto.request.RegistrarUsuarioPeticion;
 import com.jcaa.udec.collections.entrypoint.controller.dto.response.ObtenerUsuarioResponse;
@@ -17,7 +18,8 @@ public class GuiCli {
     private static final int OPCION_AGREGAR = 1;
     private static final int OPCION_BUSCAR = 2;
     private static final int OPCION_MOSTRAR_TODOS = 3;
-    private static final int OPCION_SALIR = 4;
+    private static final int OPCION_CLIENTES = 4;
+    private static final int OPCION_SALIR = 5;
     private static final String TEXTO_TITULO = "** EJEMPLO DE USO DE LISTAS Y HEXAGONAL **";
     private static final String TITULO_REGISTRO = "** INGRESE LOS DATOS DEL NUEVO USUARIO **";
     private static final String SEPARADOR = "- - - - - - - - - ";
@@ -25,7 +27,8 @@ public class GuiCli {
     private static final String TEXTO_OPCION_AGREGAR = "1 - Agregar";
     private static final String TEXTO_OPCION_BUSCAR = "2 - Buscar por Id";
     private static final String TEXTO_OPCION_MOSTRAR_TODOS = "3 - Ver todos";
-    private static final String TEXTO_OPCION_SALIR = "4 - Salir";
+    private static final String TEXTO_OPCION_CLIENTES = "4 - Gestionar clientes (Agencia de Castings)";
+    private static final String TEXTO_OPCION_SALIR = "5 - Salir";
     private static final String TEXTO_SOLICITUD_OPCION = "Ingrese el numero de la opcion: ";
     private static final String SOLICITUD_ID = "ID: ";
     private static final String SOLICITUD_PASSWORD = "PASSWORD: ";
@@ -44,14 +47,19 @@ public class GuiCli {
     private static final String MARCA_ORDEN_BYTES = "\uFEFF";
     private static final String TEXTO_VACIO = "";
     private final UsuarioControlador usuarioControlador;
+    private final ClienteCli clienteCli;
     private final Scanner entrada;
 
-    public GuiCli(UsuarioControlador usuarioControlador) {
-        this(usuarioControlador, new Scanner(System.in));
+    public GuiCli(UsuarioControlador usuarioControlador, ClienteControlador clienteControlador) {
+        this(usuarioControlador, clienteControlador, new Scanner(System.in));
     }
 
-    GuiCli(UsuarioControlador usuarioControlador, Scanner entrada) {
+    GuiCli(
+            UsuarioControlador usuarioControlador,
+            ClienteControlador clienteControlador,
+            Scanner entrada) {
         this.usuarioControlador = usuarioControlador;
+        this.clienteCli = new ClienteCli(clienteControlador, entrada);
         this.entrada = entrada;
     }
 
@@ -80,6 +88,7 @@ public class GuiCli {
                     case OPCION_AGREGAR -> registrarUsuario();
                     case OPCION_BUSCAR -> mostrarUsuarioPorId();
                     case OPCION_MOSTRAR_TODOS -> mostrarTodosLosUsuarios();
+                    case OPCION_CLIENTES -> clienteCli.ejecutarAccion();
                     case OPCION_SALIR -> continuar = false;
                 }
             } catch (UsuarioInvalidoException
@@ -100,6 +109,7 @@ public class GuiCli {
         System.out.println(TEXTO_OPCION_AGREGAR);
         System.out.println(TEXTO_OPCION_BUSCAR);
         System.out.println(TEXTO_OPCION_MOSTRAR_TODOS);
+        System.out.println(TEXTO_OPCION_CLIENTES);
         System.out.println(TEXTO_OPCION_SALIR);
         System.out.print(TEXTO_SOLICITUD_OPCION);
     }
