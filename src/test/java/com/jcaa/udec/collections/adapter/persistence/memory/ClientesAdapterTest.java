@@ -3,6 +3,7 @@ package com.jcaa.udec.collections.adapter.persistence.memory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.jcaa.udec.collections.domain.core.exception.ClienteNoExisteException;
 import com.jcaa.udec.collections.domain.core.exception.ClienteYaExisteException;
 import com.jcaa.udec.collections.domain.core.model.Cliente;
 import com.jcaa.udec.collections.domain.core.valueobject.TipoActividad;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 class ClientesAdapterTest {
     private static final AtomicInteger SECUENCIA_CODIGO = new AtomicInteger(100);
     private final GuardarClienteAdapter guardarClienteAdapter = new GuardarClienteAdapter();
+    private final ObtenerClientesAdapter obtenerClientesAdapter = new ObtenerClientesAdapter();
 
     @BeforeEach
     void limpiarClientes() {
@@ -42,6 +44,31 @@ class ClientesAdapterTest {
         assertThatThrownBy(() -> guardarClienteAdapter.guardar(crearCliente("cli-001")))
                 .isInstanceOf(ClienteYaExisteException.class)
                 .hasMessage("El cliente ya existe.");
+    }
+
+    @Test
+    void deberiaBuscarClientePorCodigoSinImportarMayusculas() {
+        // Arrange
+        Cliente cliente = crearCliente("CLI-001");
+        guardarClienteAdapter.guardar(cliente);
+
+        // Act
+        Cliente clienteEncontrado = obtenerClientesAdapter.buscarPorCodigo("cli-001");
+
+        // Assert
+        assertThat(clienteEncontrado).isSameAs(cliente);
+    }
+
+    @Test
+    void deberiaReportarClienteInexistente() {
+        // Arrange
+        guardarClienteAdapter.guardar(crearCliente());
+
+        // Act
+        // Assert
+        assertThatThrownBy(() -> obtenerClientesAdapter.buscarPorCodigo("NO-EXISTE"))
+                .isInstanceOf(ClienteNoExisteException.class)
+                .hasMessage("El cliente no existe.");
     }
 
     private static Cliente crearCliente() {
