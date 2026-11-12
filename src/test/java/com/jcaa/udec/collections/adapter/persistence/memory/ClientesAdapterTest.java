@@ -17,6 +17,7 @@ class ClientesAdapterTest {
     private final GuardarClienteAdapter guardarClienteAdapter = new GuardarClienteAdapter();
     private final ObtenerClientesAdapter obtenerClientesAdapter = new ObtenerClientesAdapter();
     private final ActualizarClienteAdapter actualizarClienteAdapter = new ActualizarClienteAdapter();
+    private final EliminarClienteAdapter eliminarClienteAdapter = new EliminarClienteAdapter();
 
     @BeforeEach
     void limpiarClientes() {
@@ -126,6 +127,33 @@ class ClientesAdapterTest {
         // Act
         // Assert
         assertThatThrownBy(() -> actualizarClienteAdapter.actualizar(cliente))
+                .isInstanceOf(ClienteNoExisteException.class)
+                .hasMessage("El cliente no existe.");
+    }
+
+    @Test
+    void deberiaEliminarClientePorCodigoSinImportarMayusculas() {
+        // Arrange
+        Cliente clienteAEliminar = crearCliente("CLI-001");
+        Cliente clienteQueQueda = crearCliente();
+        guardarClienteAdapter.guardar(clienteAEliminar);
+        guardarClienteAdapter.guardar(clienteQueQueda);
+
+        // Act
+        eliminarClienteAdapter.eliminar("cli-001");
+
+        // Assert
+        assertThat(obtenerClientesAdapter.obtenerTodos()).containsExactly(clienteQueQueda);
+    }
+
+    @Test
+    void deberiaReportarClienteInexistenteAlEliminar() {
+        // Arrange
+        guardarClienteAdapter.guardar(crearCliente());
+
+        // Act
+        // Assert
+        assertThatThrownBy(() -> eliminarClienteAdapter.eliminar("NO-EXISTE"))
                 .isInstanceOf(ClienteNoExisteException.class)
                 .hasMessage("El cliente no existe.");
     }
