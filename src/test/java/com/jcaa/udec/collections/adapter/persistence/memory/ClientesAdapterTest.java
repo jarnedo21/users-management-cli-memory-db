@@ -16,6 +16,7 @@ class ClientesAdapterTest {
     private static final AtomicInteger SECUENCIA_CODIGO = new AtomicInteger(100);
     private final GuardarClienteAdapter guardarClienteAdapter = new GuardarClienteAdapter();
     private final ObtenerClientesAdapter obtenerClientesAdapter = new ObtenerClientesAdapter();
+    private final ActualizarClienteAdapter actualizarClienteAdapter = new ActualizarClienteAdapter();
 
     @BeforeEach
     void limpiarClientes() {
@@ -96,6 +97,37 @@ class ClientesAdapterTest {
         // Assert
         assertThatThrownBy(() -> clientes.add(crearCliente()))
                 .isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
+    void deberiaReemplazarClienteAlActualizarSinDuplicarlo() {
+        // Arrange
+        guardarClienteAdapter.guardar(crearCliente("CLI-001"));
+        Cliente clienteActualizado = new Cliente(
+                "CLI-001",
+                "Cine Caribe Producciones",
+                "Avenida Pedro de Heredia 45-10",
+                "+576056401234",
+                "Carlos Ruiz",
+                TipoActividad.PUBLICIDAD_CINE);
+
+        // Act
+        actualizarClienteAdapter.actualizar(clienteActualizado);
+
+        // Assert
+        assertThat(obtenerClientesAdapter.obtenerTodos()).containsExactly(clienteActualizado);
+    }
+
+    @Test
+    void deberiaReportarClienteInexistenteAlActualizar() {
+        // Arrange
+        Cliente cliente = crearCliente();
+
+        // Act
+        // Assert
+        assertThatThrownBy(() -> actualizarClienteAdapter.actualizar(cliente))
+                .isInstanceOf(ClienteNoExisteException.class)
+                .hasMessage("El cliente no existe.");
     }
 
     private static Cliente crearCliente() {
